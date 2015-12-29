@@ -33,11 +33,9 @@ return {
       datatype = dt.text
     },
   },
-  init = function(device)
 
-  end,
   read = function(device)
-    device.profile.init()
+    log('Attempting read device '..device.id)
     local res, sock, err  = device.profile._connect(device)
     if (err ~= nil) then log('Read connect from '..device.id..' error: '..err) end
     local values = {}
@@ -46,7 +44,7 @@ return {
     if (res == true) then
       local value_key = ble.sockreadhnd(sock, 0x0f) or ''
       local value_channel = ble.sockreadhnd(sock, 0x11) or ''
-      log("sock:"..sock.." received:"..#value_channel.." byte")
+      log('Read data from device '..device.id..' return '..#value_channel..' bytes(use socket '..sock..')')
       if (#value_channel == 7) then
         status = true
         values.channel_1_p = value_channel:byte(1)
