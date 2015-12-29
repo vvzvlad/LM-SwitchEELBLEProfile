@@ -33,8 +33,11 @@ return {
       datatype = dt.text
     },
   },
+  init = function(device)
 
+  end,
   read = function(device)
+    device.profile.init()
     local res, sock, err  = device.profile._connect(device)
     if (err ~= nil) then log('Read connect from '..device.id..' error: '..err) end
     local values = {}
@@ -88,6 +91,7 @@ return {
 
 
   _connect = function(device) 
+
     local sock
     sock = ble.sock() 
     ble.settimeout(sock, 30) 
@@ -102,31 +106,29 @@ return {
     if (res ~= true) then 
       ble.close(sock) 
       sock = nil 
+      ble.down()
+      ble.up()
+      log("Interface ble restarted")
     end 
 
     return res, sock, err 
   end,
 
-  _disconnect = function(device, sock) 
-    if (sock ~= nil) then 
+  _disconnect = function(device, sock)  
       ble.close(sock)   
-    end 
-    sock = nil
   end, 
 
   _hash = function(bytes) 
     local hash = 0
-    local hash_be
     local hash_m = {}
     for i = 1, #bytes do
         hash = hash + bytes[i]
         hash = bit.band(hash - bit.rol(hash, 13), 0xFFFFFFFF)
-        hash_be = bit.bswap(hash)        
-        hash_m[4] = bit.band(bit.rshift(hash_be, 32), 0xFF)
-        hash_m[2] = bit.band(bit.rshift(hash_be, 16), 0xFF)
-        hash_m[3] = bit.band(bit.rshift(hash_be, 8), 0xFF)
-        hash_m[1] = bit.band(hash, 0xFF)
     end
+    hash_m[4] = bit.band(bit.rshift(hash, 16+8), 0xFF)
+    hash_m[3] = bit.band(bit.rshift(hash, 8+8), 0xFF)
+    hash_m[2] = bit.band(bit.rshift(hash, 8), 0xFF)
+    hash_m[1] = bit.band(hash, 0xFF)
     return hash_m
   end,  
 }
