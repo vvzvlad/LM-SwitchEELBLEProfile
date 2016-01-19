@@ -117,7 +117,7 @@ return {
       if (err ~= nil and err ~= 'failed to bind socket') then log('Write connect to '..device.name..'('..device.id..')'..' return error: '..err..'(use socket '..sock..')') end
       if (err == 'failed to bind socket') then log('Write connect to '..device.name..'('..device.id..')'..' return error: '..err..'(maybe device power-off?)') end
       if (res == true) then
-        i = 0
+        local i = 0
         err_update_accumulator = ''
         while (status == false and i<10) do
           if (i == 2) then
@@ -146,11 +146,15 @@ return {
           i = i + 1
         end  
         if (i ~= 1 and i ~= 3 and status == true) then 
-          log('Channel '..device.name..'('..device.id..')'..' updated after '..i-1..' times: error '..err_update_accumulator) 
-        elseif (i == 3 and status == true) then 
-          log('Channel '..device.name..'('..device.id..')'..' updated after reconnect(2 times): error '..err_update_accumulator) 
-        elseif (status == false) then 
-          log('Channel '..device.name..'('..device.id..')'..' NOT updated after '..i-1..' times: error '..err_update_accumulator) 
+          log('Channel '..device.name..'('..device.id..')'..' updated after '..(i-1)..' times: error '..err_update_accumulator) 
+        end
+
+        if (i == 3 and status == true) then 
+          log('Channel '..device.name..'('..device.id..')'..' updated after reconnect('..(i-1)..' times): error '..err_update_accumulator) 
+        end
+
+        if (status == false) then 
+          log('Channel '..device.name..'('..device.id..')'..' NOT updated after '..(i-1)..' times: error '..err_update_accumulator) 
         end
       end
     end
@@ -226,8 +230,13 @@ return {
         os.sleep(0.3)
         i = i + 1
       end 
-      if (res == true and i~=1 and i~=10) then log('Connected to '..device.name..'('..device.id..')'..' after '..i..' times') end
-      if (i==10 and res ~= true) then log('Connection losed to '..device.name..'('..device.id..')') end
+
+      if (res == true and i~=1 and i~=10) then
+        log('Connected to '..device.name..'('..device.id..')'..' after '..i..' times')
+      end
+      if (i==10 and res ~= true) then
+        log('Connection losed to '..device.name..'('..device.id..')')
+      end
 
       if (res ~= true) then
         ble.close(sock) 
